@@ -7,6 +7,11 @@ class Settings(BaseSettings):
     # 各类声明
     DEBUG_MODE: bool = True
     STATIC_DIR: str = "static123"
+    MYSQL_HOST: str
+    MYSQL_PORT: int
+    MYSQL_USER: str
+    MYSQL_PASSWORD: str
+    MYSQL_DATABASE: str
 
     class Config:
         env_file=(".env", ".env.prod")

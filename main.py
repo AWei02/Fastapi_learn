@@ -6,11 +6,13 @@
 # uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 # UploadFile模块在pan.py中有示例
 # 注意：一个main就可以写明白，但单文件太臃肿了，所以把路由都放router中，方法函数都放utils中
+# 如果requirements文件中有包更新了，修改requirements文件后执行pip install -r requirements.txt --upgrade
 
 
 # 引入python内嵌模块
 import sys
 import time
+from contextlib import asynccontextmanager  # 用于声明周期
 # from functools import lru_cache  # 内建缓存（删除最近最少使用策略），仅适用于少量常量配置。不适用于可变参数、异步函数
 import hashlib
 import dbm  # python内建键值对(key-value)数据库，符合sqlite的存储逻辑，加.db后缀就能看
@@ -29,6 +31,9 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates  # html网页变量模板
 from pydantic import BaseModel  # python自带类型标注库
 
+from database.redis import redis_connect
+from database.mysql import register_mysql
+
 # 引入自己编写的包
 from router import routers
 from config import config
@@ -37,9 +42,33 @@ from tmp.sub import grand_son_app
 
 URL_DB = "url_db.db"  # 不写后缀也能用，但是Navicat不方便读取
 
+@asynccontextmanager
+async def tai_init(app: FastAPI):
+    print("程序启动...")
+    app.state.redis = await redis_connect()
+    # 其他启动事件
+    # logger_init()  启动日志服务
+    # db_init()  连接数据库
+    # db_settings()  获取动态配置
+    # service_init()  启用第三方服务
+    # send_email()  发送邮件给维护者
+
+    async with register_mysql(app):
+        yield print("我是生命周期里的yield")
+    # yield print("生命周期中，等下一次被使用")
+    app.state.redis.close()
+    # 其他启动事件
+    # logger()
+    # db_close()
+    # service_close()
+    # send_email()
+    print("程序关闭...")
+
+
 
 app = FastAPI(
     debug=config.DEBUG_MODE,
+    lifespan=tai_init,
     docs_url="/docs",  # 默认docs路径地址，改成None就隐藏了,http://127.0.0.1:8000/docs
     redoc_url="/redoc",  # 默认redoc路径地址，改成None就隐藏了,http://127.0.0.1:8000/redoc
     )
@@ -237,3 +266,21 @@ def store_short_url(short_url: str, original_url: str):
     db.close()
 
 
+# @app.middleware("http")
+# async def only_for_request(request: Request, call_next):
+#     print(f"获取到了请求路径")
+#     response = await call_next(request)
+#     return response
+
+
+# @app.middleware("http")
+# async def only_for_response(request: Request, call_next):
+#     response = await call_next(request)
+#     print(f"获取到了相应结果"+response.headers["Content-Type"])
+#     return response
+
+
+## 实现中间件
+# from middleware import tai_middleware
+
+# tai_middleware(app)
