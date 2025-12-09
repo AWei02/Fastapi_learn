@@ -1,0 +1,7 @@
+# 忽略__pycache__文件夹
+__pycache__/
+
+# IDE配置
+.idea/
+
+.venv/

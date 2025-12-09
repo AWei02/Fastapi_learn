@@ -1,0 +1,9 @@
+{% include 'common/head.html' %}
+<body>
+    <article>
+        <header>{{ page.title }}</header>
+        <section>{{ page.body }}</section>
+    </article>
+    <a href="{{ url_for('item', item_id=id) }}">跳转到{{ id }}</a>
+</body>
+</html>
