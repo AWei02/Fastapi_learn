@@ -14,7 +14,9 @@ MYSQL_PASSWORD = config.MYSQL_PASSWORD
 MYSQL_DATABASE = config.MYSQL_DATABASE
 
 
-TORTOISE_MODELS = []
+# 通过加载文件的方式引入models
+# TORTOISE_MODELS = []
+TORTOISE_MODELS = ["account.models"]
 
 TORTOISE_CONFIG = {
     'connections': {
@@ -28,8 +30,8 @@ TORTOISE_CONFIG = {
                 'database': MYSQL_DATABASE,
             }
         },
-
     },
+
     'apps': {
         "tai_models": {
             'models': TORTOISE_MODELS,
@@ -40,21 +42,24 @@ TORTOISE_CONFIG = {
         #     'default_connection': 'default',
         # }
     },
-    'use_tz': False,
-    'timezone': 'Asiz/Shanghai',
+    'use_tz': False,  # 不使用默认时区
+    'timezone': 'Asia/Shanghai',
 }
 
 
 @asynccontextmanager
 async def register_mysql(app: FastAPI):
     try:
+        print("开始初始化 MySQL 连接...")
         async with RegisterTortoise(
             app,
             config=TORTOISE_CONFIG,
             generate_schemas=True,  # 根据数据模型的类建立数据表，生产环境中应为false
         ):
-            yield print("mysql连接成功")
-            await connections.close_all()
-            print("mysql已经关闭")
+            print("mysql连接成功")
+            yield
+            # await connections.close_all()
+        print("mysql连接已由 RegisterTortoise 自动关闭")
     except Exception as e:
-        print(e)
+        print(f"MySQL 初始化失败: {e}")
+        raise

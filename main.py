@@ -6,6 +6,7 @@
 # uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 # UploadFile模块在pan.py中有示例
 # 注意：一个main就可以写明白，但单文件太臃肿了，所以把路由都放router中，方法函数都放utils中
+# pip freeze > requirements.txt
 # 如果requirements文件中有包更新了，修改requirements文件后执行pip install -r requirements.txt --upgrade
 
 
@@ -54,9 +55,10 @@ async def tai_init(app: FastAPI):
     # send_email()  发送邮件给维护者
 
     async with register_mysql(app):
-        yield print("我是生命周期里的yield")
+        print("我是生命周期里的yield")
+        yield
     # yield print("生命周期中，等下一次被使用")
-    app.state.redis.close()
+    await app.state.redis.close()
     # 其他启动事件
     # logger()
     # db_close()
