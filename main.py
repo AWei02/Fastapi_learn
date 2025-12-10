@@ -24,7 +24,7 @@ from typing import Annotated  # 元数据声明：强烈推荐这个方法定义
 
 
 # 引入第三方包
-from fastapi import FastAPI, Request, Response, status, Path, Query
+from fastapi import FastAPI, Request, Response, status, Path, Query, WebSocket, WebSocketDisconnect
 from fastapi import __version__ as fastapi_version
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
@@ -286,3 +286,40 @@ def store_short_url(short_url: str, original_url: str):
 # from middleware import tai_middleware
 
 # tai_middleware(app)
+
+# websocket
+@app.websocket("/ws2")
+async def ws(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            # 接受信息
+            data = await websocket.receive_text()
+            data = f'收到了{data}，还给你'
+            # 输出信息
+            await websocket.send_text(data)
+
+    except WebSocketDisconnect:
+        print("断开连接")
+
+
+connections_chat: list[WebSocket] = []
+
+# 聊天室
+@app.websocket("/ws1/{name}")
+async def ws(websocket: WebSocket, name: str):
+    await websocket.accept()
+    connections_chat.append(websocket)
+    await websocket.send_text(f"{name},进入聊天室，可以说话")
+    try:
+        while True:
+            # 接受信息
+            data = await websocket.receive_text()
+            for client in connections_chat:
+                await client.send_text(f"{name}说：{data}")
+
+    except WebSocketDisconnect:
+        print(f"{websocket}断开连接")
+        connections_chat.remove(websocket)
+        for client in connections_chat:
+            await client.send_text("有人退出了")

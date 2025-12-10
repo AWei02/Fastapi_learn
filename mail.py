@@ -1,3 +1,5 @@
+## 邮箱有问题，时好时坏，需要使用时再研究
+
 import time
 from fastapi import APIRouter
 from pydantic import BaseModel, EmailStr
@@ -7,8 +9,6 @@ from fastapi_mail import FastMail, MessageSchema, MessageType, ConnectionConfig
 from config import config
 
 
-SEND_EMAIL_TO = "510702433@qq.com"
-
 router = APIRouter()
 
 
@@ -17,11 +17,11 @@ yahoo_mail_config = ConnectionConfig(
     MAIL_USERNAME=config.MAIL_USERNAME,
     MAIL_PASSWORD=config.MAIL_PASSWORD,
     MAIL_FROM=config.MAIL_FROM,
-    MAIL_SERVER="smtp.mail.yahoo.com",
+    MAIL_SERVER="smtp.qq.com",  # smtp.mail.yahoo.com
     MAIL_PORT=465,  # 常用465、587
     MAIL_SSL_TLS=True,  # 465开启
     MAIL_STARTTLS=False,  # 587开启
-    USE_CREDENTIALS=True,  # 是否需要验证，通常为True
+    USE_CREDENTIALS=False,  # 是否需要验证，通常为True
     VALIDATE_CERTS=False,  # 证书是否需要验证（测试环境有问题，但生产时开启没问题）
 )
 
@@ -41,7 +41,7 @@ async def send_email(email: Email):
     '''
     message = MessageSchema(
         subject="fastapi邮件",  # 邮件主题
-        recipients=[SEND_EMAIL_TO],  # 收件人(此处采用常量)。如果通过请求模型传入用email.dict().get("addresses")
+        recipients=email.addresses,  # 收件人(此处采用常量)。写死的话就["510702433@qq.com"]
         body=body_html,  # 邮件正文
         subtype=MessageType.html,
     )
@@ -50,6 +50,6 @@ async def send_email(email: Email):
     await fm.send_message(message)
 
     return {
-        'sddress': email.addresses,
+        'address': email.addresses,
         '发送邮件所需时间': time.time()-start_time,
     }

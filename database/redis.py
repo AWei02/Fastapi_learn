@@ -4,22 +4,22 @@ from redis.exceptions import ConnectionError, TimeoutError
 
 # 配置连接池
 # 配置文件应放在.env中，小主机配置
-# redis_pool = redis.ConnectionPool(
-#     host='localhost',   # 或者你的 Redis 服务器的实际 IP 地址
-#     port=6379,          # 默认端口是 6379，请根据实际情况调整
-#     password='kfcv50',    # 这里填写你的 Redis 密码
-#     decode_responses=True,  # redis转码字符串，默认返回值是字节码
-#     encoding='utf-8'
-# )
-
-# 办公配置
 redis_pool = redis.ConnectionPool(
     host='localhost',   # 或者你的 Redis 服务器的实际 IP 地址
     port=6379,          # 默认端口是 6379，请根据实际情况调整
-    password='1234',    # 这里填写你的 Redis 密码
+    password='kfcv50',    # 这里填写你的 Redis 密码
     decode_responses=True,  # redis转码字符串，默认返回值是字节码
     encoding='utf-8'
 )
+
+# 办公配置
+# redis_pool = redis.ConnectionPool(
+#     host='localhost',   # 或者你的 Redis 服务器的实际 IP 地址
+#     port=6379,          # 默认端口是 6379，请根据实际情况调整
+#     password='1234',    # 这里填写你的 Redis 密码
+#     decode_responses=True,  # redis转码字符串，默认返回值是字节码
+#     encoding='utf-8'
+# )
 
 async def redis_connect():
     try:
